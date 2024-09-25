@@ -42,32 +42,24 @@ export const getSinglePost = async (req, res) => {
     });
 
     //for saved post
-    let userId;
     const token = req.cookies?.token;
-    if (!token) {
-      userId = null;
-    } else {
+    if (token) {
       jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, payload) => {
-        if (!token) {
-          userId = null;
-        } else {
-          userId = payload.id;
+        if (!err) {
+          const saved = await prisma.savedPost.findUnique({
+            where: {
+              userId_postId: {
+                postId: id,
+                userId: payload.id,
+              },
+            },
+          });
+          res.status(200).json({ ...post, isSaved: saved ? true : false });
         }
       });
     }
-
-    const saved = await prisma.savedPost.findUnique({
-      where: {
-        userId_postId: {
-          postId: id,
-          userId,
-        },
-      },
-    });
-
-    //saved post
-
-    res.status(200).json({ ...post, isSaved: saved ? true : false });
+    //saved post end
+    res.status(200).json({ ...post, saved: false });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Failed to get single post" });
