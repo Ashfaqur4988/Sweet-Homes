@@ -54,7 +54,7 @@ export const login = async (req, res) => {
     //sending information except password
     const { password: userPassword, ...userInfo } = user;
 
-    res
+    res //setting the cookies
       .cookie("token", token, {
         httpOnly: true, //client side js cannot access our cookie
         // secure: true,
